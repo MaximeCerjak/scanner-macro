@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      CSP stricte : en dev, on autorise le serveur Vite sur 5173 et le
+      WebSocket HMR. En prod packagée, on restreindra à 'self' et à
+      l'origine de l'orchestrateur. Règle ajustée au chapitre 07.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' http://localhost:5173; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:5173 ws://localhost:5173 http://localhost:8000 ws://localhost:8000; img-src 'self' data: blob:;"
+    />
+    <title>Scanner Macro</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

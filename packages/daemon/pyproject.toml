@@ -1,0 +1,26 @@
+[project]
+name = "scanner-daemon"
+version = "0.1.0"
+description = "Daemon d'acquisition embarqué — pilotage du rig"
+requires-python = ">=3.12"
+dependencies = [
+    "scanner-shared",
+    "httpx>=0.27",
+    "pydantic-settings>=2.2",
+    # ─────────────────────────────────────────────────────────
+    # ⚠️ NE PAS AJOUTER DE DRIVER HARDWARE ICI.
+    # Driver caméra (gphoto2 | picamera2) : ajouté au chapitre 05
+    # Driver GPIO   (RPi.GPIO | gpiozero) : ajouté au chapitre 05
+    # Ces choix dépendent des décisions hardware en attente.
+    # ─────────────────────────────────────────────────────────
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["scanner_daemon"]
+
+[tool.uv.sources]
+scanner-shared = { workspace = true }
