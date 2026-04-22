@@ -1,0 +1,1 @@
+"""Schémas Pydantic partagés entre daemon et orchestrateur."""
