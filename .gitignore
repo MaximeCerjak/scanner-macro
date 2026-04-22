@@ -1,0 +1,10 @@
+node_modules
+
+packages/desktop/out/
+
+packages/daemon/scanner_daemon/__pycache__
+packages/daemon/tests/__pycache__
+packages/orchestrator/scanner_orchestrator/__pycache__
+packages/orchestrator/tests/__pycache__
+packages/shared/scanner_shared/__pycache__
+packages/shared/tests/__pycache__

@@ -5,11 +5,9 @@ members = [
     "packages/orchestrator",
 ]
 
-[tool.uv]
-python = "3.12"
-
 # Dépendances de dev communes aux trois packages Python.
 # Elles s'installent avec `uv sync --all-packages`.
+[tool.uv]
 dev-dependencies = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
@@ -32,3 +30,4 @@ ignore = ["E501"]  # géré par le formatter
 [tool.pytest.ini_options]
 testpaths = ["packages/shared/tests", "packages/daemon/tests", "packages/orchestrator/tests"]
 asyncio_mode = "auto"
+addopts = "--import-mode=importlib"
