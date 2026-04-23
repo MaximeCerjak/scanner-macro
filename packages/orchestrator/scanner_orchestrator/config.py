@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     # Orchestrator
     orchestrator_host: str = "0.0.0.0"
-    orchestrator_port: int = 8000
+    orchestrator_port: int = 8001
 
 
 settings = Settings()

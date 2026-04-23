@@ -1,76 +1,92 @@
-import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AppShell } from './components/layout/AppShell'
+import { SessionsPage } from './pages/Sessions'
 
-/**
- * Écran unique du chapitre 01 : un health check.
- *
- * Il interroge http://localhost:8000/health (l'orchestrateur FastAPI du
- * chapitre 04). Tant que l'API n'est pas écrite, l'écran affiche
- * "orchestrateur injoignable" — c'est normal et attendu.
- *
- * Objectif : valider que la chaîne Electron + Vite + React + fetch
- * fonctionne de bout en bout, et que la CSP laisse passer l'appel HTTP
- * vers localhost:8000.
- *
- * Les vraies pages (Sessions, Presets, Queue, Assets, QA, Exports)
- * arrivent au chapitre 07.
- */
+// ─── Pages (placeholders — seront remplacées une par une) ─────────────────────
 
-type HealthState =
-  | { kind: 'loading' }
-  | { kind: 'ok'; payload: unknown }
-  | { kind: 'error'; message: string }
-
-const ORCHESTRATOR_URL = 'http://localhost:8000'
-
-export function App(): JSX.Element {
-  const [health, setHealth] = useState<HealthState>({ kind: 'loading' })
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    fetch(`${ORCHESTRATOR_URL}/health`, { signal: controller.signal })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data: unknown = await res.json()
-        setHealth({ kind: 'ok', payload: data })
-      })
-      .catch((err: unknown) => {
-        if (err instanceof Error && err.name === 'AbortError') return
-        const message = err instanceof Error ? err.message : String(err)
-        setHealth({ kind: 'error', message })
-      })
-
-    return () => controller.abort()
-  }, [])
-
+function PagePlaceholder({ name }: { name: string }) {
   return (
-    <main className="app">
-      <header>
-        <h1>Scanner Macro</h1>
-        <span className="tag">Chapitre 01 — coquille vide</span>
-      </header>
+    <div style={{
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      gap: '12px',
+      color: 'var(--tx-2)',
+    }}>
+      <div style={{
+        width: '48px',
+        height: '48px',
+        border: '1px dashed var(--border-2)',
+        borderRadius: 'var(--radius-lg)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="3" y="3" width="14" height="14" rx="2" />
+          <line x1="10" y1="7" x2="10" y2="13" />
+          <line x1="7" y1="10" x2="13" y2="10" />
+        </svg>
+      </div>
+      <span style={{ fontSize: '12px' }}>{name} — à implémenter</span>
+    </div>
+  )
+}
 
-      <section className="health">
-        <h2>État de l'orchestrateur</h2>
-        {health.kind === 'loading' && <p className="muted">Vérification en cours…</p>}
-        {health.kind === 'ok' && (
-          <>
-            <p className="ok">✅ Orchestrateur joignable</p>
-            <pre>{JSON.stringify(health.payload, null, 2)}</pre>
-          </>
-        )}
-        {health.kind === 'error' && (
-          <>
-            <p className="error">❌ Orchestrateur injoignable</p>
-            <p className="muted">{health.message}</p>
-            <p className="muted">
-              Normal tant que le chapitre 04 (FastAPI) n'est pas implémenté.
-              Lancer l'API sur <code>{ORCHESTRATOR_URL}</code> pour voir cet
-              écran passer au vert.
-            </p>
-          </>
-        )}
-      </section>
-    </main>
+// ─── QueryClient ──────────────────────────────────────────────────────────────
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Retry 1 fois sur erreur (pas 3 — on ne veut pas spammer l'API)
+      retry: 1,
+      // Stale après 30s — les données sessions changent peu
+      staleTime: 30_000,
+      // Refetch au focus de fenêtre (utile en dev multi-monitor)
+      refetchOnWindowFocus: true,
+    },
+  },
+})
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+
+export function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<AppShell />}>
+            {/* Redirect racine → sessions */}
+            <Route index element={<Navigate to="/sessions" replace />} />
+
+            {/* Pages à implémenter au fil du développement */}
+            <Route path="/sessions" element={<SessionsPage />} />
+            <Route
+              path="/sessions/:id"
+              element={<PagePlaceholder name="Session detail" />}
+            />
+            <Route
+              path="/specimens"
+              element={<PagePlaceholder name="Spécimens" />}
+            />
+            <Route
+              path="/presets"
+              element={<PagePlaceholder name="Presets" />}
+            />
+            <Route
+              path="/queue"
+              element={<PagePlaceholder name="Queue" />}
+            />
+            <Route
+              path="/exports"
+              element={<PagePlaceholder name="Exports" />}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }

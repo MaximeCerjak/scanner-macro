@@ -25,6 +25,7 @@ class SessionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id:             UUID
+    name:           Optional[str] = None 
     specimen_id:    UUID
     preset_id:      UUID
     calibration_id: Optional[UUID]

@@ -1,0 +1,166 @@
+/* ─── Scanner Macro — Design System Tokens ───────────────────────────────── */
+/* Direction B : light scientifique + teal + dark mode                        */
+
+/* ── Mode light (défaut) ──────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-0: #f5f4f0;   /* page */
+  --bg-1: #ffffff;   /* surfaces, cartes, sidebar */
+  --bg-2: #f0eeea;   /* surfaces secondaires, thumbs */
+  --bg-3: #e6e4de;   /* tracks QA, barres */
+
+  /* Borders */
+  --border:   #dddbd4;  /* standard */
+  --border-2: #c8c6be;  /* hover, emphase */
+
+  /* Text */
+  --tx-0: #1a1a18;  /* principal */
+  --tx-1: #5c5b56;  /* secondaire */
+  --tx-2: #9b9990;  /* labels, hints, placeholders */
+
+  /* Accent teal scientifique */
+  --ac:    #0f6e56;
+  --ac-bg: #e1f5ee;
+  --ac-tx: #085041;
+  --ac-bd: #1d9e75;
+
+  /* Sémantique — succès */
+  --ok:    #3b6d11;
+  --ok-bg: #eaf3de;
+  --ok-bd: #97c459;
+
+  /* Sémantique — avertissement */
+  --wn:    #633806;
+  --wn-bg: #faeeda;
+  --wn-bd: #ef9f27;
+
+  /* Sémantique — erreur */
+  --er:    #791f1f;
+  --er-bg: #fcebeb;
+  --er-bd: #f09595;
+
+  /* Sémantique — info (processing) */
+  --info:    #0c447c;
+  --info-bg: #e6f1fb;
+  --info-bd: #85b7eb;
+
+  /* Typographie */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+
+  /* Rayons */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+
+  /* Ombres (légères, flat design) */
+  --shadow-none: none;
+}
+
+/* ── Mode dark ────────────────────────────────────────────────────────────── */
+:root.dark {
+  /* Backgrounds */
+  --bg-0: #0f1117;
+  --bg-1: #161920;
+  --bg-2: #1d2128;
+  --bg-3: #252930;
+
+  /* Borders */
+  --border:   #2a2f38;
+  --border-2: #3a414e;
+
+  /* Text */
+  --tx-0: #e2e4e8;
+  --tx-1: #8a93a0;
+  --tx-2: #4e5664;
+
+  /* Accent teal */
+  --ac:    #1d9e75;
+  --ac-bg: #0a2e22;
+  --ac-tx: #5dcaa5;
+  --ac-bd: #0f6e56;
+
+  /* Succès */
+  --ok:    #5dcaa5;
+  --ok-bg: #0a2e22;
+  --ok-bd: #1d9e75;
+
+  /* Avertissement */
+  --wn:    #fac775;
+  --wn-bg: #2a1f0a;
+  --wn-bd: #ba7517;
+
+  /* Erreur */
+  --er:    #f09595;
+  --er-bg: #2d1515;
+  --er-bd: #a32d2d;
+
+  /* Info */
+  --info:    #85b7eb;
+  --info-bg: #0c1e36;
+  --info-bd: #185fa5;
+}
+
+/* ── Reset et base globale ────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden; /* Electron : pas de scroll sur le shell */
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--tx-0);
+  background: var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none; /* App desktop : pas de sélection accidentelle */
+}
+
+/* Autoriser la sélection dans les champs et zones de texte */
+input, textarea, pre, code, [data-selectable] {
+  user-select: text;
+}
+
+/* Scrollbars custom — cohérentes avec le design */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tx-2);
+}
+
+/* Monospace utilitaire — pour les valeurs numériques */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  letter-spacing: -0.01em;
+}
+
+/* Focus ring accessible */
+:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

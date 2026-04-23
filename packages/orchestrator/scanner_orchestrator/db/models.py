@@ -183,6 +183,7 @@ class Session(Base):
     )
 
     id:                   Mapped[uuid.UUID]           = mapped_column(GUID, primary_key=True, default=_uuid)
+    name:                 Mapped[Optional[str]]       = mapped_column(String(200), nullable=True)
     specimen_id:          Mapped[uuid.UUID]           = mapped_column(GUID, ForeignKey("specimen.id", ondelete="RESTRICT"), nullable=False)
     preset_id:            Mapped[uuid.UUID]           = mapped_column(GUID, ForeignKey("capture_preset.id", ondelete="RESTRICT"), nullable=False)
     calibration_id:       Mapped[Optional[uuid.UUID]] = mapped_column(GUID, ForeignKey("calibration_profile.id", ondelete="SET NULL"), nullable=True)
