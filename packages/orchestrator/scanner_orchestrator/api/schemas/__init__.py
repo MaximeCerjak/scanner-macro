@@ -1,0 +1,1 @@
+"""Schémas Pydantic de l'API — 3 schémas par entité : Create / Update / Read."""

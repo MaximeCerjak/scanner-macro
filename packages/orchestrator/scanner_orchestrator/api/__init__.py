@@ -1,0 +1,1 @@
+"""Sous-package API FastAPI."""
