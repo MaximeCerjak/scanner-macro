@@ -5,6 +5,8 @@ import { SessionsPage } from './pages/Session/page'
 import { SessionDetailPage } from './pages/SessionDetail/page'
 import { SpecimensPage } from './pages/Specimens'
 import { PresetsPage } from './pages/Presets'
+import { QueuePage } from './pages/Queue/page'
+import { ExportsPage } from './pages/Exports'
 
 // ─── Pages (placeholders — seront remplacées une par une) ─────────────────────
 
@@ -81,11 +83,11 @@ export function App() {
             />
             <Route
               path="/queue"
-              element={<PagePlaceholder name="Queue" />}
+              element={<QueuePage />}
             />
             <Route
               path="/exports"
-              element={<PagePlaceholder name="Exports" />}
+              element={<ExportsPage />}
             />
           </Route>
         </Routes>

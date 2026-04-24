@@ -189,6 +189,8 @@ export const sessionsApi = {
   },
   startAcquisition: (id: string) => api.post<SessionRead>(`/sessions/${id}/start-acquisition`),
   startProcessing:  (id: string) => api.post<SessionRead>(`/sessions/${id}/start-processing`),
+  startExport:      (id: string, config: { formats: string[]; lod_levels: number; texture_resolution: number }) =>
+                    api.post<SessionRead>(`/sessions/${id}/start-export`, config),
   retry:            (id: string) => api.post<SessionRead>(`/sessions/${id}/retry`),
   close:            (id: string) => api.post<SessionRead>(`/sessions/${id}/close`),
   delete:           (id: string) => api.delete(`/sessions/${id}`),

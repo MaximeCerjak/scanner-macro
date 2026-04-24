@@ -1,0 +1,1 @@
+import { QueuePage } from "./page";
