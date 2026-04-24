@@ -3,7 +3,8 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Form, UploadFile, File
+from sqlalchemy import func
 from sqlalchemy.orm import Session as DbSession
 
 from scanner_orchestrator.api.exceptions import (
@@ -17,9 +18,14 @@ from scanner_orchestrator.db.database import get_db
 from scanner_orchestrator.db.models import Session, Specimen, CapturePreset
 from scanner_shared.enums import SessionStatus
 from scanner_shared.enums import validate_session_transition
+from scanner_orchestrator.storage.minio import put_object, remove_object
+
+import io
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_or_404(db: DbSession, session_id: UUID) -> Session:
     s = db.get(Session, session_id)
@@ -39,6 +45,44 @@ def _transition(db: DbSession, session: Session, target: SessionStatus) -> Sessi
     return session
 
 
+def _resolve_specimen(payload: SessionCreate, db: DbSession) -> Specimen:
+    """
+    Résout le specimen à associer à la nouvelle session.
+
+    Si specimen_id fourni → vérifier existence et retourner.
+    Si specimen_name fourni → chercher par nom (insensible à la casse) +
+    catégorie. Créer si introuvable.
+    """
+    if payload.specimen_id is not None:
+        specimen = db.get(Specimen, payload.specimen_id)
+        if not specimen:
+            raise NotFoundError("Specimen", payload.specimen_id)
+        return specimen
+
+    # Recherche par nom + catégorie, insensible à la casse
+    specimen = (
+        db.query(Specimen)
+        .filter(
+            func.lower(Specimen.name) == func.lower(payload.specimen_name),
+            Specimen.category == payload.specimen_category,
+        )
+        .first()
+    )
+
+    if not specimen:
+        specimen = Specimen(
+            name=payload.specimen_name,
+            category=payload.specimen_category,
+            size_mm=payload.specimen_size_mm,
+        )
+        db.add(specimen)
+        db.flush()
+
+    return specimen
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
 @router.get("", response_model=list[SessionRead])
 def list_sessions(
     limit:       int = 50,
@@ -56,12 +100,69 @@ def list_sessions(
 
 
 @router.post("", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
-def create_session(payload: SessionCreate, db: DbSession = Depends(get_db)):
-    if not db.get(Specimen, payload.specimen_id):
-        raise NotFoundError("Specimen", payload.specimen_id)
-    if not db.get(CapturePreset, payload.preset_id):
-        raise NotFoundError("CapturePreset", payload.preset_id)
-    s = Session(**payload.model_dump())
+async def create_session(
+    # Champs form (même logique que SessionCreate)
+    preset_id:          UUID                    = Form(...),
+    specimen_name:      str | None              = Form(default=None),
+    specimen_category:  str                     = Form(default="insect"),
+    specimen_size_mm:   float | None            = Form(default=None),
+    specimen_pin_status: str | None             = Form(default=None),
+    specimen_notes:      str | None             = Form(default=None),
+    specimen_id:        UUID | None             = Form(default=None),
+    name:               str | None              = Form(default=None),
+    operator:           str | None              = Form(default=None),
+    calibration_id:     UUID | None             = Form(default=None),
+    # Image optionnelle
+    thumbnail:          UploadFile | None       = File(default=None),
+    db: DbSession = Depends(get_db),
+):
+    # Validation manuelle (remplace le model_validator)
+    if specimen_id is None and not specimen_name:
+        from fastapi import HTTPException
+        raise HTTPException(422, "Fournir specimen_id ou specimen_name")
+    if specimen_id and specimen_name:
+        from fastapi import HTTPException
+        raise HTTPException(422, "Fournir specimen_id OU specimen_name, pas les deux")
+
+    # Vérifier preset
+    if not db.get(CapturePreset, preset_id):
+        raise NotFoundError("CapturePreset", preset_id)
+
+    # Résoudre ou créer le specimen
+    from scanner_orchestrator.api.schemas.session import SessionCreate as SC
+    payload = SC(
+        preset_id=preset_id,
+        specimen_id=specimen_id,
+        specimen_name=specimen_name,
+        specimen_category=specimen_category,
+        specimen_size_mm=specimen_size_mm,
+        specimen_pin_status=specimen_pin_status,
+        specimen_notes=specimen_notes,
+        name=name,
+        operator=operator,
+        calibration_id=calibration_id,
+    )
+    specimen = _resolve_specimen(payload, db)
+
+    # Upload thumbnail si fournie
+    if thumbnail and thumbnail.content_type in {"image/jpeg", "image/png"}:
+        content = await thumbnail.read()
+        if content:
+            ext = "jpg" if thumbnail.content_type == "image/jpeg" else "png"
+            key = f"specimens/{specimen.id}/thumbnail.{ext}"
+            if specimen.thumbnail_key and specimen.thumbnail_key != key:
+                remove_object(specimen.thumbnail_key)
+            put_object(key=key, data=content, content_type=thumbnail.content_type)
+            specimen.thumbnail_key = key
+            db.flush()
+
+    s = Session(
+        name=name,
+        specimen_id=specimen.id,
+        preset_id=preset_id,
+        calibration_id=calibration_id,
+        operator=operator,
+    )
     db.add(s)
     db.flush()
     return s

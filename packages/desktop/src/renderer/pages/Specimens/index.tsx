@@ -1,0 +1,1 @@
+export { SpecimensPage } from './page'

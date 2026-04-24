@@ -1,7 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppShell } from './components/layout/AppShell'
-import { SessionsPage } from './pages/Sessions'
+import { SessionsPage } from './pages/Session/page'
+import { SessionDetailPage } from './pages/SessionDetail/page'
+import { SpecimensPage } from './pages/Specimens'
+import { PresetsPage } from './pages/Presets'
 
 // ─── Pages (placeholders — seront remplacées une par une) ─────────────────────
 
@@ -66,15 +69,15 @@ export function App() {
             <Route path="/sessions" element={<SessionsPage />} />
             <Route
               path="/sessions/:id"
-              element={<PagePlaceholder name="Session detail" />}
+              element={<SessionDetailPage />}
             />
             <Route
               path="/specimens"
-              element={<PagePlaceholder name="Spécimens" />}
+              element={<SpecimensPage />}
             />
             <Route
               path="/presets"
-              element={<PagePlaceholder name="Presets" />}
+              element={<PresetsPage />}
             />
             <Route
               path="/queue"

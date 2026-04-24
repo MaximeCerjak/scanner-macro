@@ -39,6 +39,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/specimens/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Specimens
+         * @description Autocomplétion pour la modale NewSession.
+         */
+        get: operations["search_specimens_specimens_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/specimens/{specimen_id}": {
         parameters: {
             query?: never;
@@ -56,6 +76,30 @@ export interface paths {
         head?: never;
         /** Update Specimen */
         patch: operations["update_specimen_specimens__specimen_id__patch"];
+        trace?: never;
+    };
+    "/specimens/{specimen_id}/thumbnail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Thumbnail
+         * @description Redirige (307) vers une URL présignée MinIO valable 15 minutes.
+         */
+        get: operations["get_thumbnail_specimens__specimen_id__thumbnail_get"];
+        put?: never;
+        /**
+         * Upload Thumbnail
+         * @description Upload JPEG ou PNG comme thumbnail. Stocké dans MinIO, clé sauvegardée en BDD.
+         */
+        post: operations["upload_thumbnail_specimens__specimen_id__thumbnail_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/calibrations": {
@@ -464,6 +508,11 @@ export interface components {
          * @enum {string}
          */
         AssetType: "raw" | "edof_stack" | "sparse_cloud" | "dense_cloud" | "mesh_raw" | "mesh_clean" | "texture" | "export_glb" | "export_obj" | "export_stl" | "manifest" | "calibration_data";
+        /** Body_upload_thumbnail_specimens__specimen_id__thumbnail_post */
+        Body_upload_thumbnail_specimens__specimen_id__thumbnail_post: {
+            /** File */
+            file: string;
+        };
         /** CalibrationCreate */
         CalibrationCreate: {
             /** Camera Model */
@@ -674,11 +723,6 @@ export interface components {
         /** SessionCreate */
         SessionCreate: {
             /**
-             * Specimen Id
-             * Format: uuid
-             */
-            specimen_id: string;
-            /**
              * Preset Id
              * Format: uuid
              */
@@ -687,6 +731,16 @@ export interface components {
             calibration_id?: string | null;
             /** Operator */
             operator?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Specimen Id */
+            specimen_id?: string | null;
+            /** Specimen Name */
+            specimen_name?: string | null;
+            /** @default insect */
+            specimen_category: components["schemas"]["SpecimenCategory"];
+            /** Specimen Size Mm */
+            specimen_size_mm?: number | null;
         };
         /**
          * SessionDetail
@@ -699,7 +753,7 @@ export interface components {
              */
             id: string;
             /** Name */
-            name?: string | null;
+            name: string | null;
             /**
              * Specimen Id
              * Format: uuid
@@ -719,6 +773,8 @@ export interface components {
             manifest_key: string | null;
             /** Is Closed */
             is_closed: boolean;
+            /** Thumbnail Key */
+            thumbnail_key: string | null;
             /**
              * Created At
              * Format: date-time
@@ -753,7 +809,7 @@ export interface components {
              */
             id: string;
             /** Name */
-            name?: string | null;
+            name: string | null;
             /**
              * Specimen Id
              * Format: uuid
@@ -773,6 +829,8 @@ export interface components {
             manifest_key: string | null;
             /** Is Closed */
             is_closed: boolean;
+            /** Thumbnail Key */
+            thumbnail_key: string | null;
             /**
              * Created At
              * Format: date-time
@@ -793,6 +851,8 @@ export interface components {
         SessionUpdate: {
             /** Operator */
             operator?: string | null;
+            /** Name */
+            name?: string | null;
         };
         /**
          * SpecimenCategory
@@ -801,6 +861,8 @@ export interface components {
         SpecimenCategory: "insect" | "arachnid" | "other_arthropod" | "mineral" | "jewel" | "watchmaking" | "miniature" | "artifact" | "other";
         /** SpecimenCreate */
         SpecimenCreate: {
+            /** Name */
+            name?: string | null;
             /** External Id */
             external_id?: string | null;
             /** Size Mm */
@@ -825,6 +887,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Name */
+            name: string | null;
             /** External Id */
             external_id: string | null;
             /** Size Mm */
@@ -839,6 +903,8 @@ export interface components {
             collection_name: string | null;
             /** Notes */
             notes: string | null;
+            /** Thumbnail Key */
+            thumbnail_key: string | null;
             /**
              * Created At
              * Format: date-time
@@ -847,6 +913,8 @@ export interface components {
         };
         /** SpecimenUpdate */
         SpecimenUpdate: {
+            /** Name */
+            name?: string | null;
             /** External Id */
             external_id?: string | null;
             /** Size Mm */
@@ -915,6 +983,8 @@ export interface operations {
                 limit?: number;
                 offset?: number;
                 category?: components["schemas"]["SpecimenCategory"] | null;
+                /** @description Recherche par name */
+                search?: string | null;
             };
             header?: never;
             path?: never;
@@ -962,6 +1032,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SpecimenRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_specimens_specimens_search_get: {
+        parameters: {
+            query: {
+                q: string;
+                category?: components["schemas"]["SpecimenCategory"] | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpecimenRead"][];
                 };
             };
             /** @description Validation Error */
@@ -1047,6 +1150,72 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SpecimenUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpecimenRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_thumbnail_specimens__specimen_id__thumbnail_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                specimen_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_thumbnail_specimens__specimen_id__thumbnail_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                specimen_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_thumbnail_specimens__specimen_id__thumbnail_post"];
             };
         };
         responses: {

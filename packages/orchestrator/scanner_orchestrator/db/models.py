@@ -122,6 +122,7 @@ class Specimen(Base):
     __tablename__ = "specimen"
 
     id:              Mapped[uuid.UUID]       = mapped_column(GUID, primary_key=True, default=_uuid)
+    name:            Mapped[Optional[str]]   = mapped_column(String(200), nullable=True)
     external_id:     Mapped[Optional[str]]   = mapped_column(String(128), nullable=True, index=True)
     size_mm:         Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     category:        Mapped[str]             = mapped_column(String(32), nullable=False, default=SpecimenCategory.insect)
@@ -129,6 +130,7 @@ class Specimen(Base):
     taxonomy:        Mapped[Optional[dict]]  = mapped_column(JSON, nullable=True)
     collection_name: Mapped[Optional[str]]   = mapped_column(String(128), nullable=True)
     notes:           Mapped[Optional[str]]   = mapped_column(Text, nullable=True)
+    thumbnail_key:   Mapped[Optional[str]]   = mapped_column(String(500), nullable=True)
     created_at:      Mapped[datetime]        = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     sessions:        Mapped[list["Session"]] = relationship(
@@ -184,6 +186,7 @@ class Session(Base):
 
     id:                   Mapped[uuid.UUID]           = mapped_column(GUID, primary_key=True, default=_uuid)
     name:                 Mapped[Optional[str]]       = mapped_column(String(200), nullable=True)
+    thumbnail_key:        Mapped[Optional[str]]       = mapped_column(String(500), nullable=True)
     specimen_id:          Mapped[uuid.UUID]           = mapped_column(GUID, ForeignKey("specimen.id", ondelete="RESTRICT"), nullable=False)
     preset_id:            Mapped[uuid.UUID]           = mapped_column(GUID, ForeignKey("capture_preset.id", ondelete="RESTRICT"), nullable=False)
     calibration_id:       Mapped[Optional[uuid.UUID]] = mapped_column(GUID, ForeignKey("calibration_profile.id", ondelete="SET NULL"), nullable=True)
